@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Amigo Secreto — Família 12817 (Profissional)</title>
+  <meta name="description" content="Registro de desejos para Amigo Secreto — layout profissional, exportação CSV organizada, painel admin." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f5f8ff;--card:#ffffff;--muted:#6b7280;--accent:#2f6be6;--accent-600:#2b5edd;--danger:#e05252;--glass: rgba(255,255,255,0.6);
+      --radius:12px;--shadow: 0 10px 30px rgba(15,23,42,0.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;background:linear-gradient(180deg,#eef5ff 0%,var(--bg) 60%);color:#071530}
+    .wrap{max-width:1100px;margin:34px auto;padding:20px}
+
+    header{display:flex;gap:18px;align-items:center}
+    .brand{width:74px;height:74px;border-radius:14px;background:linear-gradient(180deg,var(--accent),var(--accent-600));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 8px 22px rgba(47,107,230,0.18)}
+    h1{margin:0;font-size:22px}
+    .lead{margin:6px 0 0;color:var(--muted)}
+
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:20px;margin-top:18px}
+
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    form .row{display:flex;gap:12px}
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    select,input[type=text],textarea{width:100%;padding:12px 14px;border:1px solid #e6eef8;border-radius:10px;font-size:14px;background:transparent}
+    textarea{min-height:100px;resize:vertical}
+    .actions{display:flex;gap:10px;align-items:center;margin-top:12px}
+    .btn{background:var(--accent);color:white;padding:10px 14px;border-radius:10px;border:0;font-weight:600;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(47,107,230,0.14)}
+
+    .muted{color:var(--muted)}
+
+    .list-table{width:100%;border-collapse:collapse;margin-top:10px}
+    .list-table th,.list-table td{padding:12px;border-bottom:1px solid #f1f6fb;text-align:left}
+    .list-head th{font-weight:700}
+    .controls{display:flex;gap:10px;align-items:center}
+
+    .small{font-size:13px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#f1f6ff;color:var(--accent);font-weight:600}
+
+    /* Admin panel */
+    .admin-panel{max-height:520px;overflow:auto}
+    .row-between{display:flex;justify-content:space-between;align-items:center}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(7,21,48,0.45);display:flex;align-items:center;justify-content:center;z-index:80}
+    .modal{width:480px;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 20px 60px rgba(7,21,48,0.3)}
+
+    /* Responsive */
+    @media (max-width:980px){.grid{grid-template-columns:1fr}.brand{width:56px;height:56px}}
+
+    /* table niceties */
+    td.actions-td{width:160px}
+    a.link{color:var(--accent);text-decoration:none}
+
+    /* search input */
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{padding:8px 12px;border:1px solid #eef4ff;border-radius:10px}
+
+    /* subtle animations */
+    .fade{transition:all .22s ease}
+    .fade:hover{transform:translateY(-3px)}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">AS</div>
+      <div>
+        <h1>Amigo Secreto — Família 12817</h1>
+        <div class="lead">Cada participante registra o presente desejado. Exportação organizada para Excel/Planilha com colunas padronizadas.</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <div class="pill">Família 2025</div>
+        <button class="btn ghost" id="open-admin">Painel Admin</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <form id="wish-form">
+          <div class="row">
+            <div style="flex:1">
+              <label for="name">Seu nome</label>
+              <select id="name" required></select>
+            </div>
+            <div style="flex:1">
+              <label for="gift">Presente desejado (título)</label>
+              <input id="gift" type="text" placeholder="Ex: Tênis Nike, Livro X, Vale-presente R$100" required />
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <label for="note">Observações / link (opcional)</label>
+            <textarea id="note" placeholder="Cole link, cor, número, tamanho..."></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn">Salvar desejo</button>
+            <button type="button" class="btn ghost" id="clear-btn">Limpar campos</button>
+            <div class="muted small" id="status" style="margin-left:10px"></div>
+          </div>
+        </form>
+
+        <div style="margin-top:16px">
+          <div class="row-between">
+            <strong>Desejos já registrados</strong>
+            </div>
+          
+            <div class="controls">
+  <div class="search">
+    <input id="search" placeholder="Buscar por nome ou presente" />
+  </div>
+
+  <!-- Filtro Adulto / Criança -->
+  <select id="age-filter" style="padding:8px 12px;border:1px solid #eef4ff;border-radius:10px">
+    <option value="">Todos</option>
+    <option value="adulto">Adultos</option>
+    <option value="crianca">Crianças</option>
+  </select>
+
+  <button class="btn ghost" id="export-btn">Exportar CSV</button>
+</div>
+         
+         
+          <div id="list-area" style="margin-top:12px">Nenhum desejo registrado ainda.</div>
+        </div>
+      </section>
+
+      <aside class="card">
+        <h3 style="margin-top:0">Resumo & Ações</h3>
+        <p class="muted">Painel rápido: número de participantes, preenchidos e pendentes.</p>
+        <div style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="muted">Total participantes</span><strong id="total">0</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="muted">Desejos cadastrados</span><strong id="filled">0</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="muted">Pendentes</span><strong id="pending">0</strong></div>
+        </div>
+
+        <hr style="margin:14px 0;border:none;border-top:1px solid #f1f6fb" />
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn" id="export-all-btn">Exportar CSV (com todos os campos)</button>
+          <button class="btn ghost" id="clear-all-btn">Limpar todos (admin)</button>
+        </div>
+
+        <p class="muted small" style="margin-top:12px">Export CSV gera colunas: Participante, Presente, Observações, Link (separado), Data (ISO).</p>
+      </aside>
+    </div>
+
+    <footer>Arquivo local — os dados são salvos no seu navegador. Use Exportar para compartilhar (CSV compatível com Excel).</footer>
+  </div>
+
+  <!-- Admin modal -->
+  <div id="modal" style="display:none" aria-hidden="true">
+    <div class="modal-backdrop fade">
+      <div class="modal">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Painel Admin</h3>
+          <button id="close-modal" class="btn ghost">Fechar</button>
+        </div>
+        <p class="muted small">Entre com a senha para acessar o painel completo.</p>
+        <div style="margin-top:10px">
+          <input id="admin-pass" type="password" placeholder="Senha admin" style="width:100%;padding:10px;border-radius:8px;border:1px solid #eef3fb" />
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button id="login-btn" class="btn">Entrar</button>
+            <button id="cancel-login" class="btn ghost">Cancelar</button>
+          </div>
+        </div>
+
+        <div id="admin-area" style="margin-top:12px;display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="muted">Lista completa de desejos</div>
+            <div style="display:flex;gap:8px">
+              <button id="export-admin-csv" class="btn">Exportar CSV (admin)</button>
+              <button id="export-admin-full" class="btn ghost">Exportar CSV (completos)</button>
+            </div>
+          </div>
+          <div class="admin-panel" id="admin-table-area"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* Participants provided (Modelo B: cada participante tem nome + tipo) */
+    const PARTICIPANTES = [
+      { nome: "Alceu", tipo: "adulto" },
+      { nome: "Alexandre", tipo: "adulto" },
+      { nome: "Andreia", tipo: "adulto" },
+      { nome: "Ana Carolina", tipo: "adulto" },
+      { nome: "Bene", tipo: "adulto" },
+      { nome: "Bianca", tipo: "adulto" },
+      { nome: "Caio", tipo: "adulto" },
+      { nome: "Elisangela", tipo: "adulto" },
+      { nome: "Gabriel", tipo: "adulto" },
+      { nome: "Ione", tipo: "adulto" },
+      { nome: "Heloisa", tipo: "adulto" },
+      { nome: "Julia", tipo: "adulto" },
+      { nome: "Juliana", tipo: "adulto" },
+      { nome: "Neusa", tipo: "adulto" },
+      { nome: "Olímpia", tipo: "adulto" },
+      { nome: "Paulo", tipo: "adulto" },
+      { nome: "Rita", tipo: "adulto" },
+      { nome: "Vitinho", tipo: "adulto" },
+      // crianças (conforme lista informada)
+      { nome: "Álvaro", tipo: "crianca" },
+      { nome: "Isadora", tipo: "crianca" },
+      { nome: "Manuela", tipo: "crianca" },
+      { nome: "Matheus", tipo: "crianca" },
+      { nome: "Noha", tipo: "crianca" },
+      { nome: "Sophia", tipo: "crianca" }
+    ];
+
+    // map rápido: nome -> tipo
+    const PARTICIPANTES_MAP = PARTICIPANTES.reduce((acc,p)=>{ acc[p.nome]=p.tipo; return acc; }, {});
+
+    const KEY = 'amigo_secreto_pro_v1';
+    const ADMIN_PASSWORD = 'familia12817';
+
+    const nameSelect = document.getElementById('name');
+    const giftInput = document.getElementById('gift');
+    const noteInput = document.getElementById('note');
+    const form = document.getElementById('wish-form');
+    const status = document.getElementById('status');
+    const listArea = document.getElementById('list-area');
+    const totalEl = document.getElementById('total');
+    const filledEl = document.getElementById('filled');
+    const pendingEl = document.getElementById('pending');
+    const searchInput = document.getElementById('search');
+    const ageFilter = document.getElementById('age-filter');
+
+    const exportBtn = document.getElementById('export-btn');
+    const exportAllBtn = document.getElementById('export-all-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    const modal = document.getElementById('modal');
+    const openAdmin = document.getElementById('open-admin');
+    const closeModal = document.getElementById('close-modal');
+    const loginBtn = document.getElementById('login-btn');
+    const adminPass = document.getElementById('admin-pass');
+    const adminArea = document.getElementById('admin-area');
+    const adminTableArea = document.getElementById('admin-table-area');
+    const exportAdminCsv = document.getElementById('export-admin-csv');
+    const exportAdminFull = document.getElementById('export-admin-full');
+
+    function populateNames(){
+      // popula o select com participantes (mantendo ordem)
+      nameSelect.innerHTML = '<option value="">— selecione —</option>' +
+        PARTICIPANTES.map(p=>`<option value="${p.nome}">${p.nome}</option>`).join('');
+      totalEl.textContent = PARTICIPANTES.length;
+    }
+
+    function loadData(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        return raw ? JSON.parse(raw) : {};
+      }catch(e){
+        return {};
+      }
+    }
+
+    function saveData(data){
+      localStorage.setItem(KEY, JSON.stringify(data));
+    }
+
+    function nowISO(){
+      return (new Date()).toISOString();
+    }
+
+    function renderList(filter=''){
+      const data = loadData();
+      const entries = Object.entries(data)
+        .sort((a,b)=> (a[1].updated||'').localeCompare(b[1].updated||''));
+      const rows = [];
+
+      // selectedAge do filtro HTML ('' | 'adulto' | 'crianca')
+      const selectedAge = ageFilter ? ageFilter.value : '';
+
+      for(const [name,obj] of entries){
+        const title = obj.gift || '';
+        const note = obj.note || '';
+
+        // filtro texto
+        if(filter){
+          const q = filter.toLowerCase();
+          if(!(name.toLowerCase().includes(q) || title.toLowerCase().includes(q) || note.toLowerCase().includes(q)))
+            continue;
+        }
+
+        // filtro por adulto/criança (usa o mapa)
+        if(selectedAge){
+          const tipo = PARTICIPANTES_MAP[name] || ''; // se não achar, considera como ''
+          if(selectedAge === 'crianca' && tipo !== 'crianca') continue;
+          if(selectedAge === 'adulto' && tipo !== 'adulto') continue;
+        }
+
+        rows.push({name,title,note,updated:obj.updated||''});
+      }
+
+      if(rows.length===0){
+        listArea.innerHTML = '<p class="muted">Nenhum desejo encontrado.</p>';
+        updateCounts();
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'list-table';
+      const thead = document.createElement('thead');
+      thead.innerHTML =
+        '<tr class="list-head"><th>Participante</th><th>Presente</th><th>Observações</th><th class="small">Data</th></tr>';
+      const tbody = document.createElement('tbody');
+
+      for(const r of rows){
+        const tr = document.createElement('tr');
+        const linkHtml = formatNoteAsLink(r.note);
+        tr.innerHTML =
+          `<td>${escapeHtml(r.name)}</td>
+           <td>${escapeHtml(r.title)}</td>
+           <td>${linkHtml}</td>
+           <td class="small muted">${r.updated ? r.updated.split('T')[0] : '—'}</td>`;
+        tbody.appendChild(tr);
+      }
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      listArea.innerHTML = '';
+      listArea.appendChild(table);
+      updateCounts();
+    }
+
+    function formatNoteAsLink(note){
+      if(!note) return '—';
+      const trimmed = note.trim();
+      try{
+        const url = new URL(trimmed);
+        return `<a class="link" href="${escapeHtml(url.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(truncated(url.href,80))}</a>`;
+      }catch(e){
+        return escapeHtml(truncated(trimmed,100));
+      }
+    }
+
+    function updateCounts(){
+      const data = loadData();
+      const filled = Object.keys(data).length;
+      filledEl.textContent = filled;
+      pendingEl.textContent = PARTICIPANTES.length - filled;
+    }
+
+    function escapeHtml(s){
+      if(!s) return '';
+      return String(s)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;');
+    }
+
+    function truncated(s,len){
+      if(!s) return '';
+      return s.length>len ? s.slice(0,len-1)+'…' : s;
+    }
+
+    form.addEventListener('submit', (ev)=>{
+      ev.preventDefault();
+      const name = nameSelect.value;
+      const gift = giftInput.value.trim();
+      const note = noteInput.value.trim();
+      if(!name || !gift) return showStatus('Preencha seu nome e o presente.', true);
+      const data = loadData();
+      data[name] = {gift,note,updated: nowISO()};
+      saveData(data);
+      showStatus('Desejo salvo com sucesso!', false);
+      renderList(searchInput.value);
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      giftInput.value='';
+      noteInput.value='';
+      showStatus('Campos limpos.', false);
+    });
+
+    searchInput.addEventListener('input', ()=> renderList(searchInput.value));
+    if(ageFilter) ageFilter.addEventListener('change', ()=> renderList(searchInput.value));
+
+    function showStatus(msg,isError){
+      status.textContent = msg;
+      status.style.color = isError ? 'var(--danger)' : 'green';
+      setTimeout(()=>{
+        if(status.textContent===msg) status.textContent='';
+      },2600);
+    }
+
+    function buildCSV(rows){
+      const header = ['Participante','Presente','Observações','Link','Data'];
+      const out = [header];
+      for(const r of rows){
+        let link = '';
+        const note = r.note || '';
+        try{
+          const u = new URL(note);
+          link = u.href;
+        }catch(e){
+          link = '';
+        }
+        out.push([r.name, r.gift, note, link, r.updated || '']);
+      }
+      return out
+        .map(line=>line.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(','))
+        .join('\n');
+    }
+
+    function downloadCSV(csv, filename='desejos_amigo_secreto.csv'){
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    exportBtn.addEventListener('click', ()=>{
+      const data = loadData();
+      const rows = Object.entries(data).map(([name,obj])=>({name, gift: obj.gift, note: obj.note, updated: obj.updated}));
+      if(rows.length===0) return showStatus('Nenhum dado para exportar.', true);
+      const csv = buildCSV(rows);
+      downloadCSV(csv);
+      showStatus('CSV gerado — pronto para abrir no Excel/Planilhas.', false);
+    });
+
+    exportAllBtn.addEventListener('click', ()=>{
+      const data = loadData();
+      const rows = Object.entries(data).map(([name,obj])=>({name, gift: obj.gift, note: obj.note, updated: obj.updated}));
+      if(rows.length===0) return showStatus('Nenhum dado para exportar.', true);
+      const csv = buildCSV(rows);
+      downloadCSV(csv, `desejos_amigo_secreto_full_${(new Date()).toISOString().split('T')[0]}.csv`);
+    });
+
+    openAdmin.addEventListener('click', ()=>{
+      modal.style.display='block';
+      document.getElementById('modal').removeAttribute('aria-hidden');
+    });
+
+    closeModal.addEventListener('click', ()=>{
+      modal.style.display='none';
+      adminArea.style.display='none';
+      adminPass.value='';
+    });
+
+    document.getElementById('cancel-login').addEventListener('click', ()=>{
+      modal.style.display='none';
+      adminArea.style.display='none';
+      adminPass.value='';
+    });
+
+    loginBtn.addEventListener('click', ()=>{
+      const pass = adminPass.value || '';
+      if(pass === ADMIN_PASSWORD){
+        adminArea.style.display='block';
+        renderAdminTable();
+      } else {
+        alert('Senha incorreta');
+      }
+    });
+
+    function renderAdminTable(){
+      const data = loadData();
+      const entries = Object.entries(data)
+        .sort((a,b)=> (b[1].updated||'').localeCompare(a[1].updated||''));
+
+      if(entries.length===0){
+        adminTableArea.innerHTML = '<p class="muted">Nenhum registro.</p>';
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'list-table';
+      const thead = document.createElement('thead');
+      thead.innerHTML =
+        '<tr class="list-head"><th>Participante</th><th>Presente</th><th>Observações</th><th>Data</th><th>Ações</th></tr>';
+      const tbody = document.createElement('tbody');
+
+      for(const [name,obj] of entries){
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          `<td>${escapeHtml(name)}</td>
+           <td>${escapeHtml(obj.gift)}</td>
+           <td>${formatNoteAsLink(obj.note)}</td>
+           <td class="small muted">${obj.updated?obj.updated.split('T')[0]:'—'}</td>
+           <td class="actions-td">
+             <button data-name="${escapeHtml(name)}" class="btn edit">Editar</button>
+             <button data-name="${escapeHtml(name)}" class="btn ghost remove">Excluir</button>
+           </td>`;
+        tbody.appendChild(tr);
+      }
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      adminTableArea.innerHTML='';
+      adminTableArea.appendChild(table);
+
+      adminTableArea.querySelectorAll('button.edit').forEach(b=>
+        b.addEventListener('click', (e)=>{
+          const n = e.currentTarget.dataset.name;
+          const data = loadData();
+          const obj = data[n];
+          if(!obj) return;
+          nameSelect.value = n;
+          giftInput.value = obj.gift;
+          noteInput.value = obj.note || '';
+          modal.style.display='none';
+          adminArea.style.display='none';
+          showStatus('Registro carregado para edição no formulário.', false);
+        })
+      );
+
+      adminTableArea.querySelectorAll('button.remove').forEach(b=>
+        b.addEventListener('click', (e)=>{
+          const n = e.currentTarget.dataset.name;
+          if(!confirm(`Excluir o registro de ${n}?`)) return;
+          const data = loadData();
+          delete data[n];
+          saveData(data);
+          renderAdminTable();
+          renderList(searchInput.value);
+          showStatus('Registro removido.', false);
+        })
+      );
+    }
+
+    exportAdminCsv.addEventListener('click', ()=>{
+      const data = loadData();
+      const rows = Object.entries(data).map(([name,obj])=>({name, gift: obj.gift, note: obj.note, updated: obj.updated}));
+      if(rows.length===0) return alert('Nenhum dado para exportar');
+      const csv = buildCSV(rows);
+      downloadCSV(csv, `amigo_secreto_admin_${(new Date()).toISOString().split('T')[0]}.csv`);
+    });
+
+    exportAdminFull.addEventListener('click', ()=> exportAdminCsv.click());
+
+    clearAllBtn.addEventListener('click', ()=>{
+      if(!confirm('Tem certeza que deseja apagar todos os registros? Esta ação não pode ser desfeita.')) return;
+      const pass = prompt('Digite a senha admin para confirmar:');
+      if(pass !== ADMIN_PASSWORD) return alert('Senha incorreta.');
+      localStorage.removeItem(KEY);
+      renderList();
+      renderAdminTable();
+      showStatus('Todos os registros foram apagados.', false);
+    });
+
+    function init(){
+      populateNames();
+      renderList();
+      updateCounts();
+    }
+    init();
+  </script>
+</body>
+</html>
